@@ -1,0 +1,114 @@
+# Application Configuration
+spring:
+  application:
+    name: bfpc-backend
+  
+  # Database Configuration
+  datasource:
+    url: jdbc:postgresql://localhost:5432/bfpc_db
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  
+  # JPA Configuration
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    show-sql: false
+  
+  # Flyway Migration Configuration
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+  
+  # Jackson Configuration
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    date-format: yyyy-MM-dd'T'HH:mm:ss.SSSZ
+    default-property-inclusion: non_null
+
+# Server Configuration
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+  error:
+    include-message: always
+    include-binding-errors: always
+
+# Logging Configuration
+logging:
+  level:
+    root: INFO
+    com.bfpc: DEBUG
+    org.hibernate.SQL: INFO
+
+# Application Specific Properties
+bfpc:
+  security:
+    jwt:
+      secret-key: ${JWT_SECRET:bfpcSecretKey123456789012345678901234567890}
+      expiration-time: 86400000  # 24 hours in milliseconds
+      refresh-token-expiration: 604800000  # 7 days in milliseconds
+  
+  # Feature Flags
+  features:
+    sms-notifications: true
+    email-notifications: true
+    analytics-dashboard: true
+
+# Profiles Configuration
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+  
+  # H2 Database for Development
+  datasource:
+    url: jdbc:h2:mem:bfpc_db
+    username: sa
+    password: password
+    driver-class-name: org.h2.Driver
+  
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+---
+spring:
+  config:
+    activate:
+      on-profile: test
+  
+  # Test Configuration
+  datasource:
+    url: jdbc:h2:mem:bfpc_test_db
+    username: sa
+    password: password
+    driver-class-name: org.h2.Driver
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+server:
+  port: ${PORT:8080}
+
+logging:
+  level:
+    root: WARN
+    com.bfpc: INFO
